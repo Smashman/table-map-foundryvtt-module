@@ -1,0 +1,30 @@
+{
+  "name": "table-map-foundryvtt-module",
+  "author": "Ben Williams",
+  "version": "0.0.1",
+  "keywords": [
+    "FoundryVTT"
+  ],
+  "license": "GPL-3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Smashman/table-map-foundryvtt-module"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production rollup -c --configPlugin typescript",
+    "dev": "rollup -c -w --configPlugin typescript"
+  },
+  "devDependencies": {
+    "@league-of-foundry-developers/foundry-vtt-types": "^9.255.0",
+    "@rollup/plugin-commonjs": "^21.0.2",
+    "@rollup/plugin-typescript": "^8.3.1",
+    "rollup": "^2.70.1",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-scss": "^3.0.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "sass": "^1.49.9",
+    "tslib": "^2.3.1",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {}
+}

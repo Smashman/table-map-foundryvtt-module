@@ -1,0 +1,14 @@
+{
+    "name": "table-map",
+    "title": "Table Map",
+    "description": "Use FoundryVTT to run your table with embedded display!",
+    "author": "Smashman",
+    "version": "1.0.0",
+    "minimumCoreVersion": "9",
+    "scripts": [
+        "./table-map.js"
+    ],
+    "styles": [
+        "./table-map.css"
+    ]
+}
