@@ -1,5 +1,5 @@
 import { MODULE_NAME } from './constants';
-import { getGame, wrapConsoleLog } from './helpers';
+import { getGame, log } from './helpers';
 
 export const enum ModuleSettings {
   UserID = 'userId',
@@ -8,7 +8,7 @@ export const enum ModuleSettings {
 }
 
 export const settingsData: {
-  [key in ModuleSettings]: ClientSettings.PartialSetting<
+  [key in ModuleSettings]: ClientSettings.PartialSettingConfig<
     ClientSettings.Values[`${typeof MODULE_NAME}.${key}`]
   >;
 } = {
@@ -38,15 +38,14 @@ export const settingsData: {
 
 export const registerSetting = <T extends ModuleSettings>(
   settingName: T,
-  choices?: Record<string, string>
+  data?: ClientSettings.PartialSettingConfig<
+    ClientSettings.Values[`${typeof MODULE_NAME}.${T}`]
+  >
 ): void => {
-  let data: ClientSettings.PartialSetting<
-    ClientSettings.Values[`${typeof MODULE_NAME}.${typeof settingName}`]
-  > = { ...settingsData[settingName] };
-  if (choices) {
-    data = { ...data, choices };
+  if (!data) {
+    data = { ...settingsData[settingName] };
   }
-  wrapConsoleLog(`Registering setting ${settingName}`, {data})
+  log(`Registering setting ${settingName}`, { data });
   getGame().settings.register(MODULE_NAME, settingName, data);
 };
 

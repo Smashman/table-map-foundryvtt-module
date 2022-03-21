@@ -14,8 +14,18 @@ export const getCanvas = (): Canvas => {
   return canvas;
 };
 
-export const wrapConsoleLog = (...args: any[]) => {
+const writeToConsole = (method: 'log' | 'error', ...args: any[]) => {
   if (DEBUG_MODE) {
-    console.log('Map Table Module 🗺️ |', ...args);
+    console[method]('Map Table Module 🗺️ |', ...args);
   }
+};
+
+export const log = (...args: any[]) => {
+  if (DEBUG_MODE) {
+    writeToConsole('log', ...args);
+  }
+};
+
+export const error = (...args: any[]) => {
+  writeToConsole('error', ...args);
 };

@@ -1,62 +1,71 @@
 import { PanView } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/foundry.js/canvas';
 import { CLASS_NAME } from './constants';
-import { getCanvas, getGame, wrapConsoleLog } from './helpers';
-import { getSetting, ModuleSettings, registerSetting } from './settings';
+import { error, getCanvas, getGame, log } from './helpers';
+import { ModuleKeybinds, registerKeybind } from './keybinds';
+import {
+  getSetting,
+  ModuleSettings,
+  registerSetting,
+  settingsData,
+} from './settings';
 
 class TableMap {
-  width: number;
-  height: number;
-  diagonalSize: number;
-  dpiOverride?: number;
-
-  displayUserId: string;
-
+  displayUserId: string | null = null;
   constructor() {
-    this.registerSettings();
-    
-    this.width = window.screen.width;
-    this.height = window.screen.height;
+    this.registerKeybinds();
+  }
 
-    this.displayUserId = getSetting(ModuleSettings.UserID);
-    this.diagonalSize = getSetting(ModuleSettings.DiagonalSize);
-    this.dpiOverride = getSetting(ModuleSettings.DPIOverride);
+  get isDisplayUser(): boolean {
+    return getGame().userId === this.displayUserId;
+  }
 
-    this.runForDisplayUserOnly(() =>
-      wrapConsoleLog('Current user is the Display User')
+  registerKeybinds(): void {
+    registerKeybind(ModuleKeybinds.PanToCentre, this.panAndScale.bind(this));
+    registerKeybind(
+      ModuleKeybinds.Fullscreen,
+      this.toggleFullscreen.bind(this)
     );
+    registerKeybind(ModuleKeybinds.ToggleUI, this.toggleUI.bind(this));
+  }
+
+  canvasInit(): void {
+    this.registerSettings();
+    this.displayUserId = getSetting(ModuleSettings.UserID);
+    this.runForDisplayUserOnly(() => log('Current user is the Display User'));
+    this.hideUI();
   }
 
   registerSettings(): void {
-    const users = getGame().users;
-    const choices = users!.reduce(
+    const choices: Record<string, string> = getGame().users!.reduce(
       (prev, user) => ({ ...prev, [user.data._id]: user.data.name }),
       { '': '' }
     );
 
-    registerSetting(ModuleSettings.UserID, choices);
+    const userIdData = { ...settingsData[ModuleSettings.UserID], choices };
+
+    registerSetting(ModuleSettings.UserID, userIdData);
     registerSetting(ModuleSettings.DiagonalSize);
     registerSetting(ModuleSettings.DPIOverride);
   }
 
   runForDisplayUserOnly(fn: Function): void {
-    if (getGame().userId === this.displayUserId) {
+    if (this.isDisplayUser) {
       fn();
     }
   }
 
-  calculateDPI(): number {
-    const width = this.width;
-    const ratio = this.height / width;
+  calculateDPI(width: number, height: number, diagonalSize: number): number {
+    const ratio = height / width;
     const horizontalSize = Math.sqrt(
-      Math.pow(this.diagonalSize, 2) / (1 + Math.pow(ratio, 2))
+      Math.pow(diagonalSize, 2) / (1 + Math.pow(ratio, 2))
     );
     return width / horizontalSize;
   }
 
-  hideUI(addOrRemove?: 'add' | 'remove'): void {
+  hideUI(addOrRemove: 'add' | 'remove' = 'add'): void {
     this.runForDisplayUserOnly(() => {
-      wrapConsoleLog(`${addOrRemove === 'remove' ? 'Showing' : 'Hiding'} UI`);
-      document.body.classList[addOrRemove ?? 'add'](CLASS_NAME);
+      log(`${addOrRemove === 'remove' ? 'Showing' : 'Hiding'} UI`);
+      document.body.classList[addOrRemove](CLASS_NAME);
     });
   }
 
@@ -68,18 +77,40 @@ class TableMap {
     }
   }
 
-  panAndZoom(): void {
+  panAndScale(): void {
     this.runForDisplayUserOnly(() => {
+      const width = window.screen.width;
+      const height = window.screen.height;
+
+      const diagonalSize = getSetting(ModuleSettings.DiagonalSize);
+      const dpiOverride = getSetting(ModuleSettings.DPIOverride);
+
+      const dpi = dpiOverride || this.calculateDPI(width, height, diagonalSize);
       const canvas = getCanvas();
-      const panOptions: PanView = {
-        x: canvas.dimensions!.width / 2,
-        y: canvas.dimensions!.height / 2,
-        scale:
-          this.dpiOverride || this.calculateDPI() / canvas.dimensions!.size,
-      };
-      wrapConsoleLog('Pan & Zoom', { panOptions });
-      canvas.pan(panOptions);
+      const dimensions = canvas.dimensions;
+
+      if (dimensions) {
+        const panOptions: PanView = {
+          x: dimensions.width / 2,
+          y: dimensions.height / 2,
+          scale: dpi / dimensions.size,
+        };
+        log('Pan & Scale', { panOptions });
+        canvas.pan(panOptions);
+      } else {
+        error('Canvas dimensions is null');
+      }
     });
+  }
+
+  toggleFullscreen(): void {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
   }
 }
 

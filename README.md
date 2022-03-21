@@ -2,8 +2,8 @@
 
 ## Requirements
 
--   Node
--   NPM
+- Node
+- NPM
 
 ## Set-up
 

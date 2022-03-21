@@ -3,11 +3,14 @@ import TableMap from './TableMap';
 
 let tableMap: TableMap;
 
-Hooks.once('canvasInit', () => {
+Hooks.once('init', () => {
   tableMap = new TableMap();
-  tableMap.hideUI();
+});
+
+Hooks.once('canvasInit', () => {
+  tableMap.canvasInit();
 });
 
 Hooks.on('canvasReady', () => {
-  tableMap.panAndZoom();
+  tableMap.panAndScale();
 });
