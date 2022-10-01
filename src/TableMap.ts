@@ -37,7 +37,7 @@ class TableMap {
 
   registerSettings(): void {
     const choices: Record<string, string> = getGame().users!.reduce(
-      (prev, user) => ({ ...prev, [user.data._id]: user.data.name }),
+      (prev, user) => ({ ...prev, [user.id]: user.name }),
       { '': '' }
     );
 
@@ -104,13 +104,15 @@ class TableMap {
   }
 
   toggleFullscreen(): void {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
+    this.runForDisplayUserOnly(() => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
       }
-    }
+    });
   }
 }
 

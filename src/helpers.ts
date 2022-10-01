@@ -15,9 +15,7 @@ export const getCanvas = (): Canvas => {
 };
 
 const writeToConsole = (method: 'log' | 'error', ...args: any[]) => {
-  if (DEBUG_MODE) {
-    console[method]('Map Table Module 🗺️ |', ...args);
-  }
+  console[method]('TableMap Module 🗺️ |', ...args);
 };
 
 export const log = (...args: any[]) => {

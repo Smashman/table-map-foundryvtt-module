@@ -17,6 +17,7 @@ export const settingsData: {
     hint: "User that will have UI hidden and map automatically scaled. Ensure they have a placeholder character and have 'Observer' permissions for all player characters",
     scope: 'world',
     type: String,
+    default: '',
     config: true,
   },
   [ModuleSettings.DiagonalSize]: {
@@ -32,6 +33,7 @@ export const settingsData: {
     hint: "Force a custom DPI override for scale calculation, if you do not want the module to calculate the DPI (or it's calculating incorrectly)",
     scope: 'world',
     type: Number,
+    default: null,
     config: true,
   },
 };
