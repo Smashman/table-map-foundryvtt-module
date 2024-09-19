@@ -1,11 +1,11 @@
 {
-    "compilerOptions": {
-      "moduleResolution": "node",
-      "target": "ES6",
-      "lib": ["DOM", "ES6", "ES2017", "ES2018"],
-      "types": ["@league-of-foundry-developers/foundry-vtt-types"],
-      "allowUmdGlobalAccess": true,
-      "strict": true,
-      "noImplicitAny": true,
-    }
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "ES6",
+    "lib": ["DOM", "ES6", "ES2017", "ES2018"],
+    "types": ["@league-of-foundry-developers/foundry-vtt-types"],
+    "allowUmdGlobalAccess": true,
+    "strict": true,
+    "noImplicitAny": true
   }
+}

@@ -1,28 +1,24 @@
 {
-    "id": "table-map",
-    "title": "Table Map",
-    "description": "Use FoundryVTT to run your table with embedded display!",
-    "authors": [
-        {
-            "name": "Smashman",
-            "discord": "Smashman#1364"
-        }
-    ],
-    "version": "2.0.0",
-    "compatibility": {
-        "minimum": 10,
-        "verified": 10
-    },
-    "scripts": [
-        "./table-map.js"
-    ],
-    "styles": [
-        "./table-map.css"
-    ],
-    "url": "https://github.com/Smashman/table-map-foundryvtt-module.git",
-    "manifest": "https://github.com/Smashman/table-map-foundryvtt-module/releases/latest/download/module.json",
-    "download": "https://github.com/Smashman/table-map-foundryvtt-module/releases/download/2.0.0/table-map-foundryvtt-module_2.0.0.zip",
-    "license": "https://github.com/Smashman/table-map-foundryvtt-module/blob/master/LICENSE",
-    "readme": "https://github.com/Smashman/table-map-foundryvtt-module/blob/master/README.md",
-    "bugs": "https://github.com/Smashman/table-map-foundryvtt-module/issues"
+  "id": "table-map",
+  "title": "Table Map",
+  "description": "Use FoundryVTT to run your table with embedded display!",
+  "authors": [
+    {
+      "name": "Smashman",
+      "discord": "Smashman#1364"
+    }
+  ],
+  "version": "2.0.0",
+  "compatibility": {
+    "minimum": 10,
+    "verified": 10
+  },
+  "scripts": ["./table-map.js"],
+  "styles": ["./table-map.css"],
+  "url": "https://github.com/Smashman/table-map-foundryvtt-module.git",
+  "manifest": "https://github.com/Smashman/table-map-foundryvtt-module/releases/latest/download/module.json",
+  "download": "https://github.com/Smashman/table-map-foundryvtt-module/releases/download/2.0.0/table-map-foundryvtt-module_2.0.0.zip",
+  "license": "https://github.com/Smashman/table-map-foundryvtt-module/blob/master/LICENSE",
+  "readme": "https://github.com/Smashman/table-map-foundryvtt-module/blob/master/README.md",
+  "bugs": "https://github.com/Smashman/table-map-foundryvtt-module/issues"
 }
