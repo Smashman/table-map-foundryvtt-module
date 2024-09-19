@@ -4,6 +4,7 @@ import scss from 'rollup-plugin-scss';
 import copy, { Target } from 'rollup-plugin-copy';
 import { defineConfig } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
+import replace from '@rollup/plugin-replace';
 
 const prod = process.env.NODE_ENV === 'production';
 
@@ -13,6 +14,10 @@ const copyTargets: Target[] = [
 ];
 
 const plugins = [
+  replace({
+    'process.env.NODE_ENV': prod ? "'production'" : "'development'",
+    preventAssignment: true,
+  }),
   commonjs(),
   typescript(),
   scss(),

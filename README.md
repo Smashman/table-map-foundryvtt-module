@@ -1,6 +1,6 @@
 # TableMap - Display FoundryVTT upon your table with embedded screen!
 
-Simply create a placeholder user with a placeholder character, give the user 'Observer' permissions for all characters that you the table map to see.
+Simply create a placeholder user with a placeholder character, give the user 'Observer' permissions for all characters that you want the table map to see.
 
 Then assign that user in settings, input the diagoal size of your display and away you go!
 
@@ -22,16 +22,13 @@ Force a custom DPI override for scale calculation, if you do not want the module
 
 ## Hotkeys
 
-| Name              | Default key | Description                                                |
-| :---------------- | :---------: | :--------------------------------------------------------- |
-| Pan to centre     |     `T`     | Pans and scales the map to the centre for the display user |
-| Toggle fullscreen |     `F`     | Sets browser to be fullscreen                              |
-| Toggle UI         |     `U`     | Hide or show the Foundry UI                                |
+| Name              | Default key | Description                                                                                           |
+|-:-----------------|-:-:---------|-:-----------------------------------------------------------------------------------------------------|
+| Pan to cursor     | `T`         | Pans and scales the map to the cursor. With socketlib the GM can use this command from their instance |
+| Pan to centre     | `Shift+T`   | Pans and scales the map to the centre for the display user                                            |
+| Toggle fullscreen | `F`         | Sets browser to be fullscreen                                                                         |
+| Toggle UI         | `U`         | Hide or show the Foundry UI                                                                           |
 
-## Future enhancements
-
-- Implement hotkeys to pan the screen in cases where the map is larger than the optimal map size for a screen
-- Implement socket use, to allow a DM to send hotkey commands to the display user's session
 
 ## Development
 
@@ -48,7 +45,7 @@ Force a custom DPI override for scale calculation, if you do not want the module
 
 ## License
 
-Copyright &copy; 2022 Ben Williams
+Copyright &copy; 2024 Ben Williams
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

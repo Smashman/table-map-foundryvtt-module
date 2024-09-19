@@ -3,15 +3,21 @@ import { getGame, log } from './helpers';
 
 export const enum ModuleKeybinds {
   PanToCentre = 'panToCentre',
+  PanToCursor = 'panToCursor',
   Fullscreen = 'fullscreen',
   ToggleUI = 'toggleUi',
 }
 
 const keybindData: { [key in ModuleKeybinds]: KeybindingActionConfig } = {
+  [ModuleKeybinds.PanToCursor]: {
+    name: 'Pan to cursor',
+    hint: 'Pans and scales the map to your current cursor position for the display user',
+    editable: [{ key: 'KeyT' }],
+  },
   [ModuleKeybinds.PanToCentre]: {
     name: 'Pan to centre',
     hint: 'Pans and scales the map to the centre for the display user',
-    editable: [{ key: 'KeyT' }],
+    editable: [{ key: 'KeyT', modifiers: ['SHIFT'] }],
   },
   [ModuleKeybinds.Fullscreen]: {
     name: 'Toggle fullscreen',

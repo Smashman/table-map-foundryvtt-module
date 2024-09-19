@@ -5,3 +5,10 @@ declare namespace ClientSettings {
     'table-map.dpiOverride': number | null;
   }
 }
+
+declare namespace Canvas {
+  interface Dimensions {
+    sceneX: number;
+    sceneY: number;
+  }
+}
