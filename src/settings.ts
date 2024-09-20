@@ -1,5 +1,5 @@
 import { MODULE_NAME } from './constants';
-import { getGame, log } from './helpers';
+import { getGame, debug } from './helpers';
 
 export const enum ModuleSettings {
   UserID = 'userId',
@@ -47,7 +47,7 @@ export const registerSetting = <T extends ModuleSettings>(
   if (!data) {
     data = { ...settingsData[settingName] };
   }
-  log(`Registering setting ${settingName}`, { data });
+  debug(`Registering setting ${settingName}`, { data });
   getGame().settings.register(MODULE_NAME, settingName, data);
 };
 

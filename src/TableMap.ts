@@ -1,6 +1,6 @@
 import { AnimatedPanView } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/client/pixi/board';
 import { CLASS_NAME } from './constants';
-import { error, getCanvas, getGame, log } from './helpers';
+import { logError, getCanvas, getGame, debug, log } from './helpers';
 import { ModuleKeybinds, registerKeybind } from './keybinds';
 import {
   getSetting,
@@ -8,9 +8,14 @@ import {
   registerSetting,
   settingsData,
 } from './settings';
+import { SocketFunctions, socketFunctions } from './socketFunctions';
 
 class TableMap {
   displayUserId: string | null = null;
+  diagonalSize: number | null = null;
+  dpiOverride: number | null = null;
+  socket?: SocketlibSocket;
+
   constructor(socket?: SocketlibSocket) {
     log('TableMap initialising');
     if (socket) {
@@ -23,7 +28,14 @@ class TableMap {
     this.registerKeybinds();
   }
 
-  socket?: SocketlibSocket;
+  canvasInit(): void {
+    this.registerSettings();
+    this.displayUserId = getSetting(ModuleSettings.UserID);
+    this.diagonalSize = getSetting(ModuleSettings.DiagonalSize);
+    this.dpiOverride = getSetting(ModuleSettings.DPIOverride);
+    this.runForDisplayUserOnly(() => debug('Current user is the Display User'));
+    this.hideUI();
+  }
 
   get isDisplayUser(): boolean {
     return getGame().userId === this.displayUserId;
@@ -36,12 +48,9 @@ class TableMap {
   registerKeybinds(): void {
     registerKeybind(
       ModuleKeybinds.PanToCentre,
-      this.panAndScaleCentre.bind(this, true)
+      this.panToCentre.bind(this, true, false)
     );
-    registerKeybind(
-      ModuleKeybinds.PanToCursor,
-      this.panAndScaleCursor.bind(this)
-    );
+    registerKeybind(ModuleKeybinds.PanToCursor, this.panToCursor.bind(this));
     registerKeybind(
       ModuleKeybinds.Fullscreen,
       this.toggleFullscreen.bind(this)
@@ -50,27 +59,25 @@ class TableMap {
   }
 
   registerSocketFunctions(): void {
-    log('Registering socket functions');
+    debug('Registering socket functions');
     this.socket?.register('panToCursor', (x: number, y: number) => {
-      log('panToCursor from socket', { x, y });
+      debug('panToCursor from socket', { x, y });
       this.panAndScale(x, y, true);
     });
     this.socket?.register('panToCentre', () => {
-      log('panToCentre from socket');
-      this.panAndScaleCentre();
+      debug('panToCentre from socket');
+      this.panToCentre();
     });
-  }
-
-  canvasInit(): void {
-    this.registerSettings();
-    this.displayUserId = getSetting(ModuleSettings.UserID);
-    this.runForDisplayUserOnly(() => log('Current user is the Display User'));
-    this.hideUI();
   }
 
   registerSettings(): void {
     const choices: Record<string, string> = getGame().users!.reduce(
-      (prev, user) => ({ ...prev, [user.id]: user.name }),
+      (prev, user) => {
+        if (user.isGM) {
+          return { ...prev };
+        }
+        return { ...prev, [user.id]: user.name };
+      },
       { '': '' }
     );
 
@@ -81,7 +88,16 @@ class TableMap {
     registerSetting(ModuleSettings.DPIOverride);
   }
 
+  updateSetting(_setting: Setting): void {
+    this.displayUserId = getSetting(ModuleSettings.UserID);
+    this.diagonalSize = getSetting(ModuleSettings.DiagonalSize);
+    this.dpiOverride = getSetting(ModuleSettings.DPIOverride);
+  }
+
   runForDisplayUserOnly(fn: Function): void {
+    if (!this.displayUserId) {
+      logError('Define a display user to use TableMap');
+    }
     if (this.isDisplayUser) {
       fn();
     }
@@ -103,7 +119,7 @@ class TableMap {
 
   hideUI(addOrRemove: 'add' | 'remove' = 'add'): void {
     this.runForDisplayUserOnly(() => {
-      log(`${addOrRemove === 'remove' ? 'Showing' : 'Hiding'} UI`);
+      debug(`${addOrRemove === 'remove' ? 'Showing' : 'Hiding'} UI`);
       document.body.classList[addOrRemove](CLASS_NAME);
     });
   }
@@ -120,14 +136,13 @@ class TableMap {
     const width = window.screen.width;
     const height = window.screen.height;
 
-    const diagonalSize = getSetting(ModuleSettings.DiagonalSize);
-    const dpiOverride = getSetting(ModuleSettings.DPIOverride);
-    const dpi = dpiOverride || this.calculateDPI(width, height, diagonalSize);
-
     const canvas = getCanvas();
     const dimensions = canvas.dimensions;
 
-    if (dimensions) {
+    if (dimensions && this.diagonalSize) {
+      const dpi =
+        this.dpiOverride || this.calculateDPI(width, height, this.diagonalSize);
+
       const scale = dpi / dimensions.size;
 
       const [screenWidth, screenHeight] = canvas.screenDimensions;
@@ -140,10 +155,7 @@ class TableMap {
       const right = dimensions.sceneX + dimensions.sceneWidth - midPointX;
       const bottom = dimensions.sceneY + dimensions.sceneHeight - midPointY;
 
-      const clampedPosition = {
-        x,
-        y,
-      };
+      const clampedPosition = { x, y };
 
       if (x < left) {
         clampedPosition.x = left;
@@ -164,7 +176,7 @@ class TableMap {
         clampedPosition.y = dimensions.height / 2;
       }
 
-      log('Clamped position', { clampedPosition });
+      debug('Clamped position', { clampedPosition });
 
       return clampedPosition;
     }
@@ -175,66 +187,63 @@ class TableMap {
     this.runForDisplayUserOnly(() => {
       const width = window.screen.width;
       const height = window.screen.height;
-
-      const diagonalSize = getSetting(ModuleSettings.DiagonalSize);
-      const dpiOverride = getSetting(ModuleSettings.DPIOverride);
-
-      const dpi = dpiOverride || this.calculateDPI(width, height, diagonalSize);
       const canvas = getCanvas();
       const dimensions = canvas.dimensions;
 
-      const clampedPosition = this.clamp(x, y);
+      if (!this.diagonalSize) {
+        logError('Define the diagonal size of your screen');
+      }
 
-      if (dimensions) {
+      if (dimensions && this.diagonalSize) {
+        const clampedPosition = this.clamp(x, y);
+        const dpi =
+          this.dpiOverride ||
+          this.calculateDPI(width, height, this.diagonalSize);
         const panOptions: AnimatedPanView = {
           x: clampedPosition.x,
           y: clampedPosition.y,
           scale: dpi / dimensions.size,
         };
-        log('Pan & Scale', { panOptions, animate });
+        debug('Pan & Scale', { panOptions, animate });
         canvas[animate ? 'animatePan' : 'pan'](panOptions);
       } else {
-        error('Canvas dimensions are null');
+        logError('Canvas dimensions are null');
       }
     });
   }
 
-  panAndScaleCentre(animate: boolean = true): void {
+  panToCentre(animate: boolean = true, canvasReady: boolean = false): void {
     const canvas = getCanvas();
     const dimensions = canvas.dimensions;
 
-    this.runForGMOnly(() => {
-      if (!this.displayUserId) {
-        error('Please define a display user,');
-        return;
-      }
-      this.socket?.executeAsUser('panToCentre', this.displayUserId);
-    });
-
-    if (dimensions) {
-      const x = dimensions.width / 2;
-      const y = dimensions.height / 2;
-
-      this.panAndScale(x, y, animate);
-    } else {
-      error('Canvas dimensions are null');
+    if (!canvasReady) {
+      this.runForGMOnly(() => {
+        socketFunctions[SocketFunctions.PanToCenter](this.socket)(
+          this.displayUserId
+        );
+      });
     }
+
+    this.runForDisplayUserOnly(() => {
+      if (dimensions) {
+        const x = dimensions.width / 2;
+        const y = dimensions.height / 2;
+
+        this.panAndScale(x, y, animate);
+      } else {
+        logError('Canvas dimensions are null');
+      }
+    });
   }
 
-  panAndScaleCursor(): void {
+  panToCursor(): void {
     const canvas = getCanvas();
     const mousePosition = canvas.mousePosition;
 
-    log({ mousePosition });
+    debug({ mousePosition });
 
     this.runForGMOnly(() => {
-      if (!this.displayUserId) {
-        error('Please define a display user,');
-        return;
-      }
-
-      this.socket?.executeAsUser(
-        'panToCursor',
+      socketFunctions[SocketFunctions.PanToCursor](this.socket)(
         this.displayUserId,
         mousePosition.x,
         mousePosition.y

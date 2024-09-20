@@ -19,11 +19,15 @@ const writeToConsole = (method: 'log' | 'error', ...args: any[]) => {
 };
 
 export const log = (...args: any[]) => {
+  writeToConsole('log', ...args);
+};
+
+export const debug = (...args: any[]) => {
   if (DEBUG_MODE) {
     writeToConsole('log', ...args);
   }
 };
 
-export const error = (...args: any[]) => {
+export const logError = (...args: any[]) => {
   writeToConsole('error', ...args);
 };
