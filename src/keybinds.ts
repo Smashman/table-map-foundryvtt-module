@@ -4,6 +4,7 @@ import { getGame, log } from './helpers';
 export const enum ModuleKeybinds {
   PanToCentre = 'panToCentre',
   PanToCursor = 'panToCursor',
+  ShowEntireMap = 'showEntireMap',
   Fullscreen = 'fullscreen',
   ToggleUI = 'toggleUi',
 }
@@ -19,6 +20,12 @@ const keybindData: { [key in ModuleKeybinds]: KeybindingActionConfig } = {
     hint: 'Pans and scales the map to the centre for the display user',
     editable: [{ key: 'KeyT', modifiers: ['SHIFT'] }],
   },
+  [ModuleKeybinds.ShowEntireMap]: {
+    name: 'Show entire map',
+    hint: 'Scales map to show it in its entirety',
+    editable: [{ key: 'KeyT', modifiers: ['ALT'] }],
+  },
+
   [ModuleKeybinds.Fullscreen]: {
     name: 'Toggle fullscreen',
     editable: [{ key: 'KeyF' }],

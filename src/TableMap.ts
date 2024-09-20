@@ -8,7 +8,7 @@ import {
   registerSetting,
   settingsData,
 } from './settings';
-import { SocketFunctions, socketFunctions } from './socketFunctions';
+import { SocketFunctions, socketFunctions } from './socket';
 
 class TableMap {
   displayUserId: string | null = null;
@@ -52,6 +52,10 @@ class TableMap {
     );
     registerKeybind(ModuleKeybinds.PanToCursor, this.panToCursor.bind(this));
     registerKeybind(
+      ModuleKeybinds.ShowEntireMap,
+      this.showEntireMap.bind(this)
+    );
+    registerKeybind(
       ModuleKeybinds.Fullscreen,
       this.toggleFullscreen.bind(this)
     );
@@ -60,13 +64,20 @@ class TableMap {
 
   registerSocketFunctions(): void {
     debug('Registering socket functions');
-    this.socket?.register(SocketFunctions.PanToCursor, (x: number, y: number) => {
-      debug('panToCursor from socket', { x, y });
-      this.panAndScale(x, y, true);
-    });
+    this.socket?.register(
+      SocketFunctions.PanToCursor,
+      (x: number, y: number) => {
+        debug('panToCursor from socket', { x, y });
+        this.panAndScale(x, y, true);
+      }
+    );
     this.socket?.register(SocketFunctions.PanToCentre, () => {
       debug('panToCentre from socket');
       this.panToCentre();
+    });
+    this.socket?.register(SocketFunctions.ShowEntireMap, () => {
+      debug('showEntireMap from socket');
+      this.showEntireMap();
     });
   }
 
@@ -251,6 +262,35 @@ class TableMap {
     });
 
     this.panAndScale(mousePosition.x, mousePosition.y);
+  }
+
+  showEntireMap(): void {
+    debug('Show entire map');
+
+    this.runForGMOnly(() => {
+      socketFunctions[SocketFunctions.ShowEntireMap](this.socket)(
+        this.displayUserId
+      );
+    });
+
+    this.runForDisplayUserOnly(() => {
+      const canvas = getCanvas();
+      const [screenWidth, screenHeight] = canvas.screenDimensions;
+      const dimensions = canvas.dimensions;
+      if (dimensions) {
+        const scaleX = screenWidth / dimensions.sceneWidth;
+        const scaleY = screenHeight / dimensions.sceneHeight;
+
+        debug('Scale', { scaleX, scaleY });
+
+        const panOptions: AnimatedPanView = {
+          x: dimensions.width / 2,
+          y: dimensions.height / 2,
+          scale: Math.min(scaleX, scaleY),
+        };
+        canvas.animatePan(panOptions);
+      }
+    });
   }
 
   toggleFullscreen(): void {
