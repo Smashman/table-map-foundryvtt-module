@@ -31,18 +31,18 @@ const tryToExecuteAsUser =
   };
 
 export const enum SocketFunctions {
-  PanToCenter = 'panToCentre',
+  PanToCentre = 'panToCentre',
   PanToCursor = 'panToCursor',
 }
 
 export const socketFunctions = {
-  [SocketFunctions.PanToCenter]:
+  [SocketFunctions.PanToCentre]:
     (socket?: SocketlibSocket) => (displayUserId: string | null) => {
       if (!displayUserId) {
         logError('Define a display user');
         return;
       }
-      tryToExecuteAsUser(socket)(SocketFunctions.PanToCenter, displayUserId);
+      tryToExecuteAsUser(socket)(SocketFunctions.PanToCentre, displayUserId);
     },
   [SocketFunctions.PanToCursor]:
     (socket?: SocketlibSocket) =>

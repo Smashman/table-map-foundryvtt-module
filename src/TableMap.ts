@@ -60,11 +60,11 @@ class TableMap {
 
   registerSocketFunctions(): void {
     debug('Registering socket functions');
-    this.socket?.register('panToCursor', (x: number, y: number) => {
+    this.socket?.register(SocketFunctions.PanToCursor, (x: number, y: number) => {
       debug('panToCursor from socket', { x, y });
       this.panAndScale(x, y, true);
     });
-    this.socket?.register('panToCentre', () => {
+    this.socket?.register(SocketFunctions.PanToCentre, () => {
       debug('panToCentre from socket');
       this.panToCentre();
     });
@@ -218,7 +218,7 @@ class TableMap {
 
     if (!canvasReady) {
       this.runForGMOnly(() => {
-        socketFunctions[SocketFunctions.PanToCenter](this.socket)(
+        socketFunctions[SocketFunctions.PanToCentre](this.socket)(
           this.displayUserId
         );
       });
