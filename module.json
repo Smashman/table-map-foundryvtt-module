@@ -8,7 +8,7 @@
       "discord": "Smashman#1364"
     }
   ],
-  "version": "2.2.0",
+  "version": "2.2.1",
   "compatibility": {
     "minimum": 11,
     "verified": 12
@@ -27,8 +27,8 @@
     ]
   },
   "url": "https://github.com/Smashman/table-map-foundryvtt-module.git",
-  "manifest": "https://github.com/Smashman/table-map-foundryvtt-module/releases/download/2.2.0/module.json",
-  "download": "https://github.com/Smashman/table-map-foundryvtt-module/releases/download/2.2.0/table-map-foundryvtt-module_2.2.0.zip",
+  "manifest": "https://github.com/Smashman/table-map-foundryvtt-module/releases/latest/download/module.json",
+  "download": "https://github.com/Smashman/table-map-foundryvtt-module/releases/download/2.2.1/table-map-foundryvtt-module_2.2.1.zip",
   "license": "https://github.com/Smashman/table-map-foundryvtt-module/blob/master/LICENSE",
   "readme": "https://github.com/Smashman/table-map-foundryvtt-module/blob/master/README.md",
   "bugs": "https://github.com/Smashman/table-map-foundryvtt-module/issues"
