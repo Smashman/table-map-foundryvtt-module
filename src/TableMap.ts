@@ -1,5 +1,5 @@
 import { AnimatedPanView } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/client/pixi/board';
-import { CLASS_NAME } from './constants';
+import { CLASS_NAME, DEBUG_MODE } from './constants';
 import { logError, getCanvas, getGame, debug, log } from './helpers';
 import { ModuleKeybinds, registerKeybind } from './keybinds';
 import {
@@ -8,23 +8,17 @@ import {
   registerSetting,
   settingsData,
 } from './settings';
-import { SocketFunctions, socketFunctions } from './socket';
+import { SocketFunctions, TableMapSocket } from './socket';
 
 class TableMap {
   displayUserId: string | null = null;
   diagonalSize: number | null = null;
   dpiOverride: number | null = null;
-  socket?: SocketlibSocket;
+  socket: TableMapSocket;
 
   constructor(socket?: SocketlibSocket) {
-    log('TableMap initialising');
-    if (socket) {
-      log('Socket is available');
-      this.socket = socket;
-      this.registerSocketFunctions();
-    } else {
-      log('Socket is not available');
-    }
+    log(`TableMap initialising${DEBUG_MODE ? ' - Debug' : ''}`);
+    this.socket = new TableMapSocket(this, socket);
     this.registerKeybinds();
   }
 
@@ -60,25 +54,6 @@ class TableMap {
       this.toggleFullscreen.bind(this)
     );
     registerKeybind(ModuleKeybinds.ToggleUI, this.toggleUI.bind(this));
-  }
-
-  registerSocketFunctions(): void {
-    debug('Registering socket functions');
-    this.socket?.register(
-      SocketFunctions.PanToCursor,
-      (x: number, y: number) => {
-        debug('panToCursor from socket', { x, y });
-        this.panAndScale(x, y, true);
-      }
-    );
-    this.socket?.register(SocketFunctions.PanToCentre, () => {
-      debug('panToCentre from socket');
-      this.panToCentre();
-    });
-    this.socket?.register(SocketFunctions.ShowEntireMap, () => {
-      debug('showEntireMap from socket');
-      this.showEntireMap();
-    });
   }
 
   registerSettings(): void {
@@ -229,9 +204,7 @@ class TableMap {
 
     if (!canvasReady) {
       this.runForGMOnly(() => {
-        socketFunctions[SocketFunctions.PanToCentre](this.socket)(
-          this.displayUserId
-        );
+        this.socket.socketFunctions[SocketFunctions.PanToCentre]();
       });
     }
 
@@ -251,11 +224,10 @@ class TableMap {
     const canvas = getCanvas();
     const mousePosition = canvas.mousePosition;
 
-    debug({ mousePosition });
+    debug('Pan to cursor', { mousePosition });
 
     this.runForGMOnly(() => {
-      socketFunctions[SocketFunctions.PanToCursor](this.socket)(
-        this.displayUserId,
+      this.socket.socketFunctions[SocketFunctions.PanToCursor](
         mousePosition.x,
         mousePosition.y
       );
@@ -268,9 +240,7 @@ class TableMap {
     debug('Show entire map');
 
     this.runForGMOnly(() => {
-      socketFunctions[SocketFunctions.ShowEntireMap](this.socket)(
-        this.displayUserId
-      );
+      this.socket.socketFunctions[SocketFunctions.ShowEntireMap]();
     });
 
     this.runForDisplayUserOnly(() => {

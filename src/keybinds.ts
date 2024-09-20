@@ -1,5 +1,5 @@
 import { MODULE_NAME } from './constants';
-import { getGame, log } from './helpers';
+import { getGame, debug } from './helpers';
 
 export const enum ModuleKeybinds {
   PanToCentre = 'panToCentre',
@@ -42,6 +42,6 @@ export const registerKeybind = <T extends ModuleKeybinds>(
   onDown: (ctx: KeyboardEventContext) => boolean | void
 ): void => {
   const data: KeybindingActionConfig = { ...keybindData[keybindName], onDown };
-  log(`Registering keybind ${keybindName}`);
+  debug(`Registering keybind '${keybindName}'`);
   getGame().keybindings.register(MODULE_NAME, keybindName, data);
 };

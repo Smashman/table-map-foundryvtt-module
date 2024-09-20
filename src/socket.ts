@@ -1,22 +1,91 @@
-import { getGame, logError } from './helpers';
+import { debug, getGame, log, logError } from './helpers';
+import TableMap from './TableMap';
 
-const tryToExecuteAsUser =
-  (socket?: SocketlibSocket) =>
-  async (
-    functionName: SocketFunctions,
-    displayUserId: string | null,
-    ...params: any[]
-  ) => {
-    if (getGame().userId === displayUserId) {
-      logError(`Attempted to send socket execution of ${functionName} to self`);
-      return;
+export const enum SocketFunctions {
+  PanToCentre = 'panToCentre',
+  PanToCursor = 'panToCursor',
+  ShowEntireMap = 'showEntireMap',
+}
+
+export class TableMapSocket {
+  socket?: SocketlibSocket;
+  tableMap: TableMap;
+
+  constructor(tableMap: TableMap, socket?: SocketlibSocket) {
+    this.socket = socket;
+    this.tableMap = tableMap;
+    if (socket) {
+      log('Socket is available');
+      this.registerSocketFunctions();
+    } else {
+      log('Socket is not available');
     }
-    if (!displayUserId) {
+  }
+
+  registerSocketFunction<T extends SocketFunctions>(
+    functionName: T,
+    func: Function
+  ): void {
+    debug(`Registering socket function '${functionName}'`);
+    this.socket?.register(functionName, (...params: any[]) => {
+      debug(`Socket execution of ${functionName}`, { ...params });
+      func(...params);
+    });
+  }
+
+  registerSocketFunctions(): void {
+    debug('Registering socket functions');
+    this.registerSocketFunction(
+      SocketFunctions.PanToCursor,
+      (x: number, y: number) => {
+        this.tableMap.panAndScale(x, y, true);
+      }
+    );
+    this.registerSocketFunction(SocketFunctions.PanToCentre, () =>
+      this.tableMap.panToCentre()
+    );
+    this.registerSocketFunction(SocketFunctions.ShowEntireMap, () =>
+      this.tableMap.showEntireMap()
+    );
+  }
+
+  get socketEnabled(): boolean {
+    return !!this.socket;
+  }
+
+  get displayUserId(): string | null {
+    return this.tableMap.displayUserId;
+  }
+
+  socketFunctions = {
+    [SocketFunctions.PanToCentre]: () => {
+      this.tryToExecuteAsUser(SocketFunctions.PanToCentre);
+    },
+    [SocketFunctions.PanToCursor]: (x: number, y: number) => {
+      this.tryToExecuteAsUser(SocketFunctions.PanToCursor, x, y);
+    },
+    [SocketFunctions.ShowEntireMap]: () => {
+      this.tryToExecuteAsUser(SocketFunctions.ShowEntireMap);
+    },
+  } satisfies {
+    [key in SocketFunctions]: (...params: never) => void;
+  };
+
+  async tryToExecuteAsUser(functionName: SocketFunctions, ...params: any[]) {
+    if (!this.displayUserId) {
       logError('Define a display user');
       return;
     }
+    if (getGame().userId === this.displayUserId) {
+      logError(`Attempted to send socket execution of ${functionName} to self`);
+      return;
+    }
     try {
-      await socket?.executeAsUser(functionName, displayUserId, ...params);
+      await this.socket?.executeAsUser(
+        functionName,
+        this.displayUserId,
+        ...params
+      );
     } catch (error) {
       const errorName =
         typeof error === 'object' &&
@@ -32,33 +101,5 @@ const tryToExecuteAsUser =
         throw error;
       }
     }
-  };
-
-export const enum SocketFunctions {
-  PanToCentre = 'panToCentre',
-  PanToCursor = 'panToCursor',
-  ShowEntireMap = 'showEntireMap',
+  }
 }
-
-export const socketFunctions = {
-  [SocketFunctions.PanToCentre]: (socket) => (displayUserId: string | null) => {
-    tryToExecuteAsUser(socket)(SocketFunctions.PanToCentre, displayUserId);
-  },
-  [SocketFunctions.PanToCursor]:
-    (socket) => (displayUserId: string | null, x: number, y: number) => {
-      tryToExecuteAsUser(socket)(
-        SocketFunctions.PanToCursor,
-        displayUserId,
-        x,
-        y
-      );
-    },
-  [SocketFunctions.ShowEntireMap]:
-    (socket) => (displayUserId: string | null) => {
-      tryToExecuteAsUser(socket)(SocketFunctions.ShowEntireMap, displayUserId);
-    },
-} satisfies {
-  [key in SocketFunctions]: (
-    socket?: SocketlibSocket
-  ) => (...params: never) => void;
-};

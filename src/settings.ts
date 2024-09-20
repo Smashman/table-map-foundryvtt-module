@@ -47,7 +47,7 @@ export const registerSetting = <T extends ModuleSettings>(
   if (!data) {
     data = { ...settingsData[settingName] };
   }
-  debug(`Registering setting ${settingName}`, { data });
+  debug(`Registering setting '${settingName}'`, { data });
   getGame().settings.register(MODULE_NAME, settingName, data);
 };
 
