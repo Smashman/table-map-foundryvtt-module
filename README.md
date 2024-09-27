@@ -23,7 +23,7 @@ Force a custom DPI override for scale calculation, if you do not want the module
 ## Hotkeys
 
 | Name              | Default key | Description                                                                                           |
-|--:----------------|--:-:--------|--:----------------------------------------------------------------------------------------------------|
+| :---------------- | :---------: | :---------------------------------------------------------------------------------------------------- |
 | Pan to cursor     | `T`         | Pans and scales the map to the cursor. With socketlib the GM can use this command from their instance |
 | Pan to centre     | `Shift+T`   | Pans and scales the map to the centre for the display user                                            |
 | Show entire map   | `Alt+T`     | Zooms out (or in) to show entire map on screen                                                        |
